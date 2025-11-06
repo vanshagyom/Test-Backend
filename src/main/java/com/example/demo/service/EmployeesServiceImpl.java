@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.EmployeesDTO;
 import com.example.demo.entity.Employees;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.EmployeesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ public class EmployeesServiceImpl implements EmployeesService {
     @Override
     public Employees getById(Long id) {
         return empRepo.findById(id)
-                .orElseThrow(()-> new RuntimeException("Not found with id: " + id));
+                .orElseThrow(()-> new ResourceNotFoundException("Employee with id: " + id + " not found."));
     }
 
     @Override

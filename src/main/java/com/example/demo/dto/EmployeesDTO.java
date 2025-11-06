@@ -14,29 +14,29 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class EmployeesDTO {
-    @NotBlank(message = "can't be blank")
+    @NotBlank(message = "name can't be blank")
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Customer name must contain only letters and spaces")
     private String name;
 
-    @NotBlank(message = "can't be blank")
+    @NotBlank(message = "department can't be blank")
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Customer department must contain only letters and spaces")
     private String department;
 
-    @NotBlank(message = "can't be blank")
+    @NotBlank(message = "designation can't be blank")
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Customer designation must contain only letters and spaces")
     private String designation;
 
-    @NotNull(message = "can't be null")
+    @NotNull(message = "salary can't be null")
     @DecimalMin(value = "0.01", inclusive = true, message = "salary should be greater than zero")
     @Digits(integer = 8, fraction = 2, message = "salary must be a valid decimal number")
     private BigDecimal salary;
 
-    @NotNull(message = "enter date")
+    @NotNull(message = "Enter Joining Date")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date joiningDate;
 
-    @NotBlank(message = "can't be blank")
+    @NotBlank(message = "status can't be blank")
     @Pattern(regexp = "^[A-Za-z\\s]+$", message = "Customer status must contain only letters and spaces")
     private String status;
 }
