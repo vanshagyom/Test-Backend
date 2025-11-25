@@ -1,13 +1,18 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
-@Data
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "testEmployees")
 public class Employees {
 
@@ -33,4 +38,7 @@ public class Employees {
 
     @Column(nullable = false, length = 20, name = "status")
     private String status;
+
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SalaryAudit> salaryAudits = new ArrayList<>();
 }

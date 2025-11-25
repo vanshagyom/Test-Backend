@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.EmployeesDTO;
-import com.example.demo.entity.Employees;
+import com.example.demo.dto.SalaryAdjustmentDTO;
 import com.example.demo.service.EmployeesService;
 import com.example.demo.utils.ResponseHandler;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,9 +9,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/employees")
@@ -26,32 +29,83 @@ public class EmployeesController {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAllEmployees(HttpServletRequest request){
-        List<Employees> allEmployees = empService.getAllEmployees();
-        return ResponseHandler.generateResponse("Orders Fetched Successfully", HttpStatus.OK, allEmployees, request);
+    public ResponseEntity<Object> getAllEmployees(HttpServletRequest request) {
+        List<EmployeesDTO> allEmployees = empService.getAllEmployees();
+        return ResponseHandler.generateResponse("Employees Fetched Successfully", HttpStatus.OK, allEmployees, request);
     }
 
     @PostMapping
-    public ResponseEntity<Object> addNewEmployee( @Valid @RequestBody EmployeesDTO empDto, HttpServletRequest request){
-        Employees newEmp = empService.addNew(empDto);
+    public ResponseEntity<Object> addNewEmployee(
+            @Valid @RequestBody EmployeesDTO empDto,
+            HttpServletRequest request
+    ) {
+        EmployeesDTO newEmp = empService.addNew(empDto);
         return ResponseHandler.generateResponse("Added Successfully", HttpStatus.OK, newEmp, request);
     }
 
-    @GetMapping("getEmployeeById/{id}")
-    public ResponseEntity<Object> getEmployeeByID(@PathVariable Long id, HttpServletRequest request){
-        Employees byIdEmployee = empService.getById(id);
-        return ResponseHandler.generateResponse("Fetched Successfully", HttpStatus.OK, byIdEmployee, request);
+    @GetMapping("/getEmployeeById/{id}")
+    public ResponseEntity<Object> getEmployeeByID(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
+        EmployeesDTO employee = empService.getById(id);
+        return ResponseHandler.generateResponse("Fetched Successfully", HttpStatus.OK, employee, request);
     }
 
-    @PatchMapping ("updateEmployee/{myId}")
-    public ResponseEntity<Object> updateEmployeeById(@PathVariable Long myId, @Valid @RequestBody EmployeesDTO empUpdateDto, HttpServletRequest request){
-        Employees updateEmp = empService.updateById(myId, empUpdateDto);
-        return ResponseHandler.generateResponse("Updated Successfully", HttpStatus.OK, updateEmp, request);
+    @PatchMapping("/updateEmployee/{id}")
+    public ResponseEntity<Object> updateEmployeeById(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeesDTO empUpdateDto,
+            HttpServletRequest request
+    ) {
+        EmployeesDTO updatedEmp = empService.updateById(id, empUpdateDto);
+        return ResponseHandler.generateResponse("Updated Successfully", HttpStatus.OK, updatedEmp, request);
     }
 
-    @DeleteMapping("deleteById/{id}")
-    public ResponseEntity<Object> deleteEmployeeByID(@PathVariable Long id, HttpServletRequest request){
+    @DeleteMapping("/deleteById/{id}")
+    public ResponseEntity<Object> deleteEmployeeByID(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ) {
         empService.deleteById(id);
         return ResponseHandler.generateResponse("Deleted Successfully", HttpStatus.OK, null, request);
     }
+
+    @PatchMapping("/{id}/adjust-salary")
+    public ResponseEntity<Object> adjustSalary(
+            @PathVariable Long id,
+            @RequestBody SalaryAdjustmentDTO adjustmentDTO,
+            HttpServletRequest request
+    ) {
+        EmployeesDTO updatedEmployee = empService.adjustSalary(id, adjustmentDTO);
+        return ResponseHandler.generateResponse("Salary Audited Successfully", HttpStatus.OK, updatedEmployee, request);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Object> getEmployees(
+            @RequestParam(required = false) String department,
+            @RequestParam(required = false) BigDecimal minSalary,
+            @RequestParam(required = false) BigDecimal maxSalary,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String sort
+    ) {
+        Page<EmployeesDTO> employeePage = empService.getEmployees(
+                department, minSalary, maxSalary, status, page, size, sort
+        );
+
+        // Wrap Page content + metadata in a stable structure
+        var response = Map.of(
+                "content", employeePage.getContent(),
+                "pageNumber", employeePage.getNumber(),
+                "pageSize", employeePage.getSize(),
+                "totalElements", employeePage.getTotalElements(),
+                "totalPages", employeePage.getTotalPages(),
+                "isLast", employeePage.isLast()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
 }
